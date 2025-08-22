@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>一年周期计时器</title>
+<style>
+  body{background:#0d1117;color:#eee;font-family:sans-serif;margin:0;padding:0}
+  header{position:fixed;top:0;right:0;padding:10px}
+  #startBtn{padding:8px 16px;font-size:14px;background:#222;color:#69f;border:1px solid #69f;border-radius:6px;cursor:pointer}
+  #startBtn[disabled]{opacity:0.6;cursor:not-allowed}
+  main{max-width:600px;margin:80px auto;padding:20px}
+  .row{margin:12px 0;font-size:20px}
+  .val{font-weight:bold;font-size:24px;margin-right:6px}
+  .slash{margin:0 6px;opacity:0.7}
+</style>
+</head>
+<body>
+  <header>
+    <button id="startBtn">开始计时</button>
+  </header>
+  <main>
+    <h2>一年周期计时器</h2>
+    <div class="row">秒：<span class="val" id="secVal">0</span><span class="slash">/</span><span id="secYear"></span> 秒</div>
+    <div class="row">小时：<span class="val" id="hourVal">0.0000</span><span class="slash">/</span><span id="hourYear"></span> 小时</div>
+    <div class="row">天：<span class="val" id="dayVal">0.0000</span><span class="slash">/</span><span id="dayYear"></span> 天</div>
+    <div class="row">年：<span class="val" id="yearVal">0.0000</span><span class="slash">/</span><span id="yearYear"></span> 年</div>
+  </main>
+
+<script>
+  // 单位换算
+  const secPerMin = 60;
+  const secPerHour = 60 * secPerMin;
+  const secPerDay = 23.9344 * secPerHour;
+  const secPerYear = 365.24 * secPerDay;
+
+  // 显示每年的长度
+  document.getElementById("secYear").textContent = secPerYear.toFixed(0);
+  document.getElementById("hourYear").textContent = (secPerYear/secPerHour).toFixed(4);
+  document.getElementById("dayYear").textContent = (secPerYear/secPerDay).toFixed(4);
+  document.getElementById("yearYear").textContent = (secPerYear/secPerYear).toFixed(4);
+
+  const btn = document.getElementById("startBtn");
+  let startTime = localStorage.getItem("yearTimerStart");
+
+  if (startTime) {
+    btn.disabled = true;
+    startTime = parseInt(startTime, 10);
+    start();
+  }
+
+  btn.addEventListener("click", ()=>{
+    if (!localStorage.getItem("yearTimerStart")) {
+      const now = Date.now();
+      localStorage.setItem("yearTimerStart", now);
+      startTime = now;
+      btn.disabled = true;
+      start();
+    }
+  });
+
+  function start() {
+    setInterval(()=>{
+      const now = Date.now();
+      const elapsedSec = (now - startTime)/1000;
+
+      // 循环到一年之内
+      const cycleSec = elapsedSec % secPerYear;
+
+      const secs = Math.floor(cycleSec);
+      const hours = cycleSec/secPerHour;
+      const days = cycleSec/secPerDay;
+      const years = cycleSec/secPerYear;
+
+      document.getElementById("secVal").textContent = secs;
+      document.getElementById("hourVal").textContent = hours.toFixed(4);
+      document.getElementById("dayVal").textContent = days.toFixed(4);
+      document.getElementById("yearVal").textContent = years.toFixed(4);
+    },1000);
+  }
+</script>
+</body>
+</html>
